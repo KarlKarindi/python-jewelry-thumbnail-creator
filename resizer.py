@@ -33,7 +33,7 @@ def crop_image(img):
     width = crop_info.X_MAX - crop_info.X_MIN
     height = crop_info.Y_MAX - crop_info.Y_MIN
     
-    print(crop_info)
+    #print(crop_info)
     
     crop_info = fix_incorrect_aspect_ratio(crop_info, width, height)
     cropped_img = img.crop((crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
@@ -99,9 +99,9 @@ def paste_to_background(img, background, bg_w, bg_h, img_name):
     background.save(TEMP_DIR_OUT + "OUT_" + img_name + ".png")
     
 
-#PICTURES_DIR_IN = "C:/Users/Karl/Desktop/wetransfer-8d7bb4/08.12.2020/"
-PICTURES_DIR_IN = "C:/Users/Karl/Desktop/test/"
-PICTURES_DIR_OUT = "C:/Users/Karl/Desktop/OUT_Pildid/"
+PICTURES_DIR_IN = "C:/Users/Karl/Desktop/Ehete pildid/"
+#PICTURES_DIR_IN = "C:/Users/Karl/Desktop/test/"
+PICTURES_DIR_OUT = "C:/Users/Karl/Desktop/Pildid_1_600x600/"
 TEMP_DIR = "C:/Users/Karl/Desktop/resizing/"
 TEMP_DIR_OUT = "C:/Users/Karl/Desktop/resizing/out/"
 pic_files = [f for f in listdir(PICTURES_DIR_IN) if isfile(join(PICTURES_DIR_IN, f))]
@@ -112,13 +112,13 @@ print("Resizing", len(pic_files), "pictures\n")
 
 for pic_name in pic_files:
     if pic_name.endswith(".jpg"):
-        print("Resizing picture", pic_name)
+        #print("Resizing picture", pic_name)
         pic_name_without_jpg = pic_name.strip(".jpg")
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
         paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
         img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
         cropped_img = crop_image(img_with_background)
         resize(cropped_img, pic_name)
-        print()
+        #print()
 
 print("Resizing completed")
