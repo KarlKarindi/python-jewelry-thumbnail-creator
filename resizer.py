@@ -1,7 +1,7 @@
 from PIL import Image
 from os import listdir
 from os.path import isfile, join
-
+import numpy as np
 
 
 class CropInfo(object):
@@ -20,18 +20,20 @@ def resize(cropped_img, pic_name):
 def crop_image(img):
     pixels = img.load()
     width, height = img.width - 1, img.height - 1
-
+    threshold = 250
+    dist = 5
+    
     crop_info = CropInfo()
     for x in range(0, width):
         for y in range(0, height):
             pixel = pixels[x, y]
-            if not pixel_is_white(pixel):
+            if not pixel_is_white(pixel, threshold, dist):
                 crop_info = extract_info(crop_info, x, y)
 
     width = crop_info.X_MAX - crop_info.X_MIN
     height = crop_info.Y_MAX - crop_info.Y_MIN
     
-    # print(crop_info)
+    print(crop_info)
     
     crop_info = fix_incorrect_aspect_ratio(crop_info, width, height)
     cropped_img = img.crop((crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
@@ -60,7 +62,7 @@ def fix_incorrect_aspect_ratio(info, width, height):
         
     
     crop_width = info.X_MAX - info.X_MIN
-    offset = 100
+    offset = 150
     x_offset_extra = 0
     if crop_width < 600:
         x_offset_extra = (600 - crop_width) / 2
@@ -76,8 +78,19 @@ def fix_incorrect_aspect_ratio(info, width, height):
 
     return info
 
-def pixel_is_white(pixel):
-    return pixel == (255, 255, 255) or pixel == (254, 254, 254) or pixel == (253, 253, 253)
+def pixel_is_white(pixel, threshold, dist):
+    r,g,b = pixel[0], pixel[1], pixel[2]
+    first_test_pass = ((r >= threshold)
+            & (g >= threshold)
+            & (b >= threshold))
+    return first_test_pass
+    
+    if first_test_pass:
+        return ((np.abs(r-g)<dist)
+            & (np.abs(r-b)<dist)
+            & (np.abs(g-b)<dist))
+    
+    return False
 
 def paste_to_background(img, background, bg_w, bg_h, img_name):
     img_w, img_h = img.size
@@ -99,13 +112,13 @@ print("Resizing", len(pic_files), "pictures\n")
 
 for pic_name in pic_files:
     if pic_name.endswith(".jpg"):
-        #print("Resizing picture", pic_name)
+        print("Resizing picture", pic_name)
         pic_name_without_jpg = pic_name.strip(".jpg")
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
         paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
         img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
         cropped_img = crop_image(img_with_background)
         resize(cropped_img, pic_name)
-        #print()
+        print()
 
 print("Resizing completed")
