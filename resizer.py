@@ -2,9 +2,6 @@ from PIL import Image
 from os import listdir
 from os.path import isfile, join
 
-pictures_dir = "C:/Users/Karl/Desktop/wetransfer-8d7bb4/08.12.2020/"
-new_pictures_dir = "C:/Users/Karl/Desktop/EhetePildidVaiksemad2/"
-pic_files = [f for f in listdir(pictures_dir) if isfile(join(pictures_dir, f))]
 
 
 class CropInfo(object):
@@ -16,15 +13,9 @@ class CropInfo(object):
     def __str__(self):
         return str(self.X_MIN) + " " + str(self.X_MAX) + " " + str(self.Y_MIN) + " " + str(self.Y_MAX)
 
-def resize(pic_files):
-    for pic_name in pic_files:
-        if pic_name.endswith(".jpg"):
-            original_img = Image.open(pictures_dir + pic_name)
-            cropped_img = crop_image(original_img)
-            if cropped_img.width < 600:
-                print(cropped_img.size, pic_name)
-            new_img = cropped_img.resize((600, 600))
-            new_img.save(new_pictures_dir + pic_name, "JPEG", optimize=True)
+def resize(cropped_img, pic_name):
+    new_img = cropped_img.resize((600, 600))
+    new_img.save(PICTURES_DIR_OUT + pic_name.strip(".jpg") + ".png", optimize=True)
 
 def crop_image(img):
     pixels = img.load()
@@ -41,7 +32,6 @@ def crop_image(img):
     height = crop_info.Y_MAX - crop_info.Y_MIN
     
     crop_info = fix_incorrect_aspect_ratio(crop_info, width, height)
-    
     cropped_img = img.crop((crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
     return cropped_img
 
@@ -68,7 +58,7 @@ def fix_incorrect_aspect_ratio(info, width, height):
         
     
     crop_width = info.X_MAX - info.X_MIN
-    offset = 150
+    offset = 100
     x_offset_extra = 0
     if crop_width < 600:
         x_offset_extra = (600 - crop_width) / 2
@@ -87,6 +77,30 @@ def fix_incorrect_aspect_ratio(info, width, height):
 def pixel_is_white(pixel):
     return pixel == (255, 255, 255) or pixel == (254, 254, 254)
 
+def paste_to_background(img, background, bg_w, bg_h):
+    img_w, img_h = img.size
+    offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+    background.paste(img, offset)
+    background.save('out.png')
+    
+
+#PICTURES_DIR_IN = "C:/Users/Karl/Desktop/wetransfer-8d7bb4/08.12.2020/"
+PICTURES_DIR_IN = "C:/Users/Karl/Desktop/test/"
+PICTURES_DIR_OUT = "C:/Users/Karl/Desktop/OUT_Pildid/"
+TEMP_DIR = "C:/Users/Karl/Desktop/resizing/"
+pic_files = [f for f in listdir(PICTURES_DIR_IN) if isfile(join(PICTURES_DIR_IN, f))]
+
+background = Image.new('RGB', (2500, 2500), (255, 255, 255))
+bg_w, bg_h = background.size
+
 print("Resizing", len(pic_files), "pictures")
-resize(pic_files)
+
+for pic_name in pic_files:
+    if pic_name.endswith(".jpg"):
+        original_img = Image.open(PICTURES_DIR_IN + pic_name)
+        paste_to_background(original_img, background, bg_w, bg_h)
+        img_with_background = Image.open(TEMP_DIR + "out.png")
+        cropped_img = crop_image(img_with_background)
+        resize(cropped_img, pic_name)
+
 print("Resizing completed")
