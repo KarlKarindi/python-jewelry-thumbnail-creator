@@ -31,7 +31,7 @@ def crop_image(img):
     width = crop_info.X_MAX - crop_info.X_MIN
     height = crop_info.Y_MAX - crop_info.Y_MIN
     
-    print(crop_info)
+    # print(crop_info)
     
     crop_info = fix_incorrect_aspect_ratio(crop_info, width, height)
     cropped_img = img.crop((crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
@@ -77,7 +77,7 @@ def fix_incorrect_aspect_ratio(info, width, height):
     return info
 
 def pixel_is_white(pixel):
-    return pixel == (255, 255, 255) or pixel == (254, 254, 254)
+    return pixel == (255, 255, 255) or pixel == (254, 254, 254) or pixel == (253, 253, 253)
 
 def paste_to_background(img, background, bg_w, bg_h, img_name):
     img_w, img_h = img.size
@@ -99,13 +99,13 @@ print("Resizing", len(pic_files), "pictures\n")
 
 for pic_name in pic_files:
     if pic_name.endswith(".jpg"):
-        print("Resizing picture", pic_name)
+        #print("Resizing picture", pic_name)
         pic_name_without_jpg = pic_name.strip(".jpg")
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
         paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
         img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
         cropped_img = crop_image(img_with_background)
         resize(cropped_img, pic_name)
-        print()
+        #print()
 
 print("Resizing completed")
