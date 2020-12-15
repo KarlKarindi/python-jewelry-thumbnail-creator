@@ -1,5 +1,5 @@
 from PIL import Image
-from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, UNCROPPABLE_PICTURES_LOC, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET
+from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, UNCROPPABLE_PICTURES_LOC, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, WHITE_BG_ADDITIONAL, SAVE_FORMAT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -110,15 +110,16 @@ for i, pic_name in enumerate(pic_files, 1):
         if pic_name in NOT_TO_CROP:
             resize(original_img, pic_name)
         else:
-            white_bg_size = original_img.width
-            background = Image.new('RGB', (2 * OFFSET + white_bg_size, 2 * OFFSET + white_bg_size), (255, 255, 255))
+            original_img_width = original_img.width
+            background = Image.new('RGB', (WHITE_BG_ADDITIONAL + original_img_width,
+                                           WHITE_BG_ADDITIONAL + original_img_width), (255, 255, 255))
             bg_w, bg_h = background.size
             paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
             img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
             cropped_img = crop_image(img_with_background)
-            resize(cropped_img, pic_name_without_jpg + ".png")
+            resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
         print("Resized picture #" + str(i) + ":", pic_name,
-              original_img.size, "- Saved as:", pic_name_without_jpg + ".png")
+              original_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
 
 print("Resizing completed!")
