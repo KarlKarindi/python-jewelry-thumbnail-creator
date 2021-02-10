@@ -3,6 +3,8 @@ from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, UNCROPPABLE_PICTURES_LOC, 
 from os import listdir
 from os.path import isfile, join
 import numpy as np
+import os
+import glob
 
 
 class CropInfo(object):
@@ -100,26 +102,32 @@ def paste_to_background(img, background, bg_w, bg_h, img_name):
 
 
 pic_files = [f for f in listdir(PICTURES_DIR_IN) if isfile(join(PICTURES_DIR_IN, f))]
-NOT_TO_CROP = [f for f in open(UNCROPPABLE_PICTURES_LOC).readlines()]
 
-print("Resizing", len(pic_files), "pictures\n")
-for i, pic_name in enumerate(pic_files, 1):
+
+print("Resizing", len(pic_files), "pictures")
+print("Save location:", PICTURES_DIR_OUT, '\n')
+for i, pic_name in enumerate(pic_files[:1], 1):
     if pic_name.lower().endswith(".jpg"):
         pic_name_without_jpg = pic_name.split(".")[0]
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
-        if pic_name in NOT_TO_CROP:
-            resize(original_img, pic_name)
-        else:
-            original_img_width = original_img.width
-            background = Image.new('RGB', (WHITE_BG_ADDITIONAL + original_img_width,
-                                           WHITE_BG_ADDITIONAL + original_img_width), (255, 255, 255))
-            bg_w, bg_h = background.size
-            paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
-            img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
-            cropped_img = crop_image(img_with_background)
-            resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
+        
+        original_img_width = original_img.width
+        background = Image.new('RGB', (WHITE_BG_ADDITIONAL + original_img_width, WHITE_BG_ADDITIONAL + original_img_width), (255, 255, 255))
+        bg_w, bg_h = background.size
+        paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
+        img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
+        cropped_img = crop_image(img_with_background)
+        resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
         print("Resized picture #" + str(i) + ":", pic_name,
               original_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
 
 print("Resizing completed!")
+print("Deleting all temporary files...")
+files = glob.glob(TEMP_DIR_OUT + "/*.png")
+for f in files:
+    try:
+        os.remove(f)
+    except OSError as e:
+        print("Error: %s : %s" % (f, e.strerror))
+print("Deleting temporary files completed!")
