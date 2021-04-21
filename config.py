@@ -9,7 +9,7 @@ USE_DIST = False
 DIST = 5
 
 # # Append / after every folder
-PICTURES_DIR_IN = "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/Gaura/"
+PICTURES_DIR_IN = "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/Tissot kellad/"
 # Must add folder to save as well if it doesn't exist;
 PICTURES_DIR_OUT = "C:/Users/Karl/Projects/picture_resizer/resized_pics/"
 TEMP_DIR = "C:/Users/Karl/Projects/picture_resizer/"

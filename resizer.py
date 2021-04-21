@@ -108,8 +108,10 @@ pic_files = [f for f in listdir(PICTURES_DIR_IN)
 
 print("Starting the resizing process!")
 print("Save location:", PICTURES_DIR_OUT, '\n')
-for i, pic_name in enumerate(pic_files, 1):
+pic_count = 0
+for pic_name in pic_files:
     if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
+        pic_count += 1
         pic_name_without_jpg = pic_name.split(".")[0]
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
 
@@ -124,7 +126,7 @@ for i, pic_name in enumerate(pic_files, 1):
         cropped_img = crop_image(img_with_background)
         resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
-        print("Resized picture #" + str(i) + ":", pic_name,
+        print("Resized picture #" + str(pic_count) + ":", pic_name,
               original_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
 
 print("Resizing completed!")
