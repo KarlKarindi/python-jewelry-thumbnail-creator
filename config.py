@@ -1,6 +1,6 @@
 
 # Default value 300. Use 0 if its a pic from top left to bottom right. Use default if it's anything else.
-OFFSET = 0
+OFFSET = 150
 WHITE_BG_ADDITIONAL = 2500  # Default value 3 * OFFSET
 
 # Set threshold to 100 if it's a self-made picture

@@ -112,7 +112,9 @@ pic_count = 0
 for pic_name in pic_files:
     if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
         pic_count += 1
-        pic_name_without_jpg = pic_name.split(".")[0]
+        last_period_index = pic_name.rindex(".")
+        pic_name_without_jpg = pic_name[:last_period_index]
+
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
 
         original_img_width = original_img.width
