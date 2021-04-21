@@ -22,8 +22,7 @@ def resize(cropped_img, pic_name):
     new_img.save(PICTURES_DIR_OUT + pic_name, optimize=True)
 
 
-def crop_image(img):
-    pixels = img.load()
+def crop_image(img, pixels):
     width, height = img.width - 1, img.height - 1
 
     crop_info = CropInfo()
@@ -31,7 +30,6 @@ def crop_image(img):
         for y in range(0, height):
             pixel = pixels[x, y]
             if not pixel_is_white(pixel):
-                r, g, b = pixel[0], pixel[1], pixel[2]
                 crop_info = extract_info(crop_info, x, y)
 
     width = crop_info.X_MAX - crop_info.X_MIN
@@ -104,6 +102,16 @@ def paste_to_background(img, background, bg_w, bg_h, img_name):
     background.save(TEMP_DIR_OUT + "OUT_" + img_name + ".png")
 
 
+def find_rgb_of_og_img_bg(img):
+    pixels = img.load()
+    width, height = img.width - 1, img.height - 1
+    for x in range(0, width):
+        for y in range(0, height):
+            pixel = pixels[x, y]
+            if pixel_is_white(pixel):
+                return pixel
+
+
 pic_files = [f for f in listdir(PICTURES_DIR_IN)
              if isfile(join(PICTURES_DIR_IN, f))]
 
@@ -115,24 +123,26 @@ for pic_name in pic_files:
         pic_count += 1
         pic_name_without_jpg = pic_name[:pic_name.rindex(".")]
 
-        original_img = Image.open(PICTURES_DIR_IN + pic_name)
-        background = Image.new('RGB', (BG_ADDITIONAL_PIXELS + original_img.width,
-                                       BG_ADDITIONAL_PIXELS + original_img.width), (255, 255, 255))
+        og_img = Image.open(PICTURES_DIR_IN + pic_name)
+        bg_rgb = find_rgb_of_og_img_bg(og_img)
+        background = Image.new('RGB', (BG_ADDITIONAL_PIXELS + og_img.width,
+                                       BG_ADDITIONAL_PIXELS + og_img.width), (bg_rgb[0], bg_rgb[1], bg_rgb[2]))
 
         bg_w, bg_h = background.size
-        paste_to_background(original_img, background, bg_w,
+        paste_to_background(og_img, background, bg_w,
                             bg_h, pic_name_without_jpg)
 
         img_with_background = Image.open(
             TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
-        cropped_img = crop_image(img_with_background)
+        pixels = img_with_background.load()
+        cropped_img = crop_image(img_with_background, pixels)
 
         resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
-        print("\nResized picture #" + str(pic_count) + ":", pic_name,
-              original_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
+        print("Resized picture #" + str(pic_count) + ":", pic_name,
+              og_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
 
-print("Resizing completed!")
+print("\nResizing completed!")
 print("Deleting all temporary files...")
 files = glob.glob(TEMP_DIR_OUT + "/*.png")
 for f in files:
