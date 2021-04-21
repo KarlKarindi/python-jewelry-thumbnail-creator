@@ -1,5 +1,5 @@
 from PIL import Image
-from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, UNCROPPABLE_PICTURES_LOC, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, WHITE_BG_ADDITIONAL, SAVE_FORMAT
+from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, WHITE_BG_ADDITIONAL, SAVE_FORMAT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -37,7 +37,8 @@ def crop_image(img):
     height = crop_info.Y_MAX - crop_info.Y_MIN
 
     crop_info = fix_incorrect_aspect_ratio(crop_info, width, height)
-    cropped_img = img.crop((crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
+    cropped_img = img.crop(
+        (crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
     return cropped_img
 
 
@@ -89,6 +90,7 @@ def pixel_is_white(pixel):
     if not USE_DIST:
         return first_test_pass
 
+    # this takes a lot more time for negligible difference
     return ((np.abs(r - g) < DIST)
             and (np.abs(r - b) < DIST)
             and (np.abs(g - b) < DIST))
@@ -101,21 +103,24 @@ def paste_to_background(img, background, bg_w, bg_h, img_name):
     background.save(TEMP_DIR_OUT + "OUT_" + img_name + ".png")
 
 
-pic_files = [f for f in listdir(PICTURES_DIR_IN) if isfile(join(PICTURES_DIR_IN, f))]
+pic_files = [f for f in listdir(PICTURES_DIR_IN)
+             if isfile(join(PICTURES_DIR_IN, f))]
 
-
-print("Resizing", len(pic_files), "pictures")
+print("Starting the resizing process!")
 print("Save location:", PICTURES_DIR_OUT, '\n')
-for i, pic_name in enumerate(pic_files[:1], 1):
-    if pic_name.lower().endswith(".jpg"):
+for i, pic_name in enumerate(pic_files, 1):
+    if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
         pic_name_without_jpg = pic_name.split(".")[0]
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
-        
+
         original_img_width = original_img.width
-        background = Image.new('RGB', (WHITE_BG_ADDITIONAL + original_img_width, WHITE_BG_ADDITIONAL + original_img_width), (255, 255, 255))
+        background = Image.new('RGB', (WHITE_BG_ADDITIONAL + original_img_width,
+                                       WHITE_BG_ADDITIONAL + original_img_width), (255, 255, 255))
         bg_w, bg_h = background.size
-        paste_to_background(original_img, background, bg_w, bg_h, pic_name_without_jpg)
-        img_with_background = Image.open(TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
+        paste_to_background(original_img, background, bg_w,
+                            bg_h, pic_name_without_jpg)
+        img_with_background = Image.open(
+            TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
         cropped_img = crop_image(img_with_background)
         resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
