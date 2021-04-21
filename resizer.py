@@ -7,6 +7,48 @@ import os
 import glob
 
 
+def start():
+    pic_files = [f for f in listdir(PICTURES_DIR_IN)
+                 if isfile(join(PICTURES_DIR_IN, f))]
+
+    print("Starting the resizing process!")
+    print("Save location:", PICTURES_DIR_OUT, '\n')
+    pic_count = 0
+    for pic_name in pic_files:
+        if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
+            pic_count += 1
+            pic_name_without_jpg = pic_name[:pic_name.rindex(".")]
+
+            og_img = Image.open(PICTURES_DIR_IN + pic_name)
+            bg_rgb = find_rgb_of_og_img_bg(og_img)
+            background = Image.new('RGB', (BG_ADDITIONAL_PIXELS + og_img.width,
+                                           BG_ADDITIONAL_PIXELS + og_img.width), (bg_rgb[0], bg_rgb[1], bg_rgb[2]))
+
+            bg_w, bg_h = background.size
+            paste_to_background(og_img, background, bg_w,
+                                bg_h, pic_name_without_jpg)
+
+            img_with_background = Image.open(
+                TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
+            pixels = img_with_background.load()
+            cropped_img = crop_image(img_with_background, pixels)
+
+            resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
+
+            print("Resized picture #" + str(pic_count) + ":", pic_name,
+                  og_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
+
+    print("\nResizing completed!")
+    print("Deleting all temporary files...")
+    files = glob.glob(TEMP_DIR_OUT + "/*.png")
+    for f in files:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+    print("Deleting temporary files completed!")
+
+
 class CropInfo(object):
     X_MIN = 999999
     X_MAX = -1
@@ -111,43 +153,4 @@ def find_rgb_of_og_img_bg(img):
             if pixel_is_white(pixel):
                 return pixel
 
-
-pic_files = [f for f in listdir(PICTURES_DIR_IN)
-             if isfile(join(PICTURES_DIR_IN, f))]
-
-print("Starting the resizing process!")
-print("Save location:", PICTURES_DIR_OUT, '\n')
-pic_count = 0
-for pic_name in pic_files:
-    if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
-        pic_count += 1
-        pic_name_without_jpg = pic_name[:pic_name.rindex(".")]
-
-        og_img = Image.open(PICTURES_DIR_IN + pic_name)
-        bg_rgb = find_rgb_of_og_img_bg(og_img)
-        background = Image.new('RGB', (BG_ADDITIONAL_PIXELS + og_img.width,
-                                       BG_ADDITIONAL_PIXELS + og_img.width), (bg_rgb[0], bg_rgb[1], bg_rgb[2]))
-
-        bg_w, bg_h = background.size
-        paste_to_background(og_img, background, bg_w,
-                            bg_h, pic_name_without_jpg)
-
-        img_with_background = Image.open(
-            TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
-        pixels = img_with_background.load()
-        cropped_img = crop_image(img_with_background, pixels)
-
-        resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
-
-        print("Resized picture #" + str(pic_count) + ":", pic_name,
-              og_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
-
-print("\nResizing completed!")
-print("Deleting all temporary files...")
-files = glob.glob(TEMP_DIR_OUT + "/*.png")
-for f in files:
-    try:
-        os.remove(f)
-    except OSError as e:
-        print("Error: %s : %s" % (f, e.strerror))
-print("Deleting temporary files completed!")
+start()
