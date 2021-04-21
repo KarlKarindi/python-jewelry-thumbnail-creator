@@ -1,5 +1,5 @@
 from PIL import Image
-from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, WHITE_BG_ADDITIONAL, SAVE_FORMAT
+from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, BG_ADDITIONAL_PIXELS, SAVE_FORMAT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -31,6 +31,7 @@ def crop_image(img):
         for y in range(0, height):
             pixel = pixels[x, y]
             if not pixel_is_white(pixel):
+                r, g, b = pixel[0], pixel[1], pixel[2]
                 crop_info = extract_info(crop_info, x, y)
 
     width = crop_info.X_MAX - crop_info.X_MIN
@@ -112,23 +113,23 @@ pic_count = 0
 for pic_name in pic_files:
     if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
         pic_count += 1
-        last_period_index = pic_name.rindex(".")
-        pic_name_without_jpg = pic_name[:last_period_index]
+        pic_name_without_jpg = pic_name[:pic_name.rindex(".")]
 
         original_img = Image.open(PICTURES_DIR_IN + pic_name)
+        background = Image.new('RGB', (BG_ADDITIONAL_PIXELS + original_img.width,
+                                       BG_ADDITIONAL_PIXELS + original_img.width), (255, 255, 255))
 
-        original_img_width = original_img.width
-        background = Image.new('RGB', (WHITE_BG_ADDITIONAL + original_img_width,
-                                       WHITE_BG_ADDITIONAL + original_img_width), (255, 255, 255))
         bg_w, bg_h = background.size
         paste_to_background(original_img, background, bg_w,
                             bg_h, pic_name_without_jpg)
+
         img_with_background = Image.open(
             TEMP_DIR_OUT + "OUT_" + pic_name_without_jpg + ".png")
         cropped_img = crop_image(img_with_background)
+
         resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
-        print("Resized picture #" + str(pic_count) + ":", pic_name,
+        print("\nResized picture #" + str(pic_count) + ":", pic_name,
               original_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
 
 print("Resizing completed!")
