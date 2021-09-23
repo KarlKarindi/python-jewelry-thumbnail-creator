@@ -11,9 +11,9 @@ USE_DIST = False
 DIST = 5
 
 # # Append / after every folder
-PICTURES_DIR_IN = "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/tommy Hilfiger/special/"
+PICTURES_DIR_IN = "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/Charlowe uued pildid 07.2021/"
 # Must add folder to save as well if it doesn't exist;
-PICTURES_DIR_OUT = "C:/Users/Karl/Projects/picture_resizer/resized_pics/Tommy hilfiger/servastservani/"
+PICTURES_DIR_OUT = "C:/Users/Karl/Projects/picture_resizer/resized_pics/test_charlowe/"
 TEMP_DIR = "C:/Users/Karl/Projects/picture_resizer/"
 TEMP_DIR_OUT = "C:/Users/Karl/AppData/Local/picture_resizer/"
 SAVE_FORMAT = ".png"

@@ -50,10 +50,11 @@ def start():
 
 
 class CropInfo(object):
-    X_MIN = 999999
-    X_MAX = -1
-    Y_MIN = 999999
-    Y_MAX = -1
+    def __init__(self, X_MIN, X_MAX, Y_MIN, Y_MAX):
+        self.X_MIN = X_MIN
+        self.X_MAX = X_MAX
+        self.Y_MIN = Y_MIN
+        self.Y_MAX = Y_MAX
 
     def __str__(self):
         return "X_MIN: {}, X_MAX: {}, Y_MIN: {}, Y_MAX: {}".format(self.X_MIN, self.X_MAX, self.Y_MIN, self.Y_MAX)
@@ -65,22 +66,51 @@ def resize(cropped_img, pic_name):
 
 
 def crop_image(img, pixels):
-    width, height = img.width - 1, img.height - 1
+    w, h = img.width - 1, img.height - 1
 
-    crop_info = CropInfo()
-    for x in range(0, width):
-        for y in range(0, height):
-            pixel = pixels[x, y]
-            if not pixel_is_white(pixel):
-                crop_info = extract_info(crop_info, x, y)
+    x_min = find_x_min(pixels, w, h)
+    x_max = find_x_max(pixels, w, h)
+    y_min = find_y_min(pixels, x_min, w, h)
+    y_max = find_y_max(pixels, x_min, w, h)
+    
+    crop_info = CropInfo(
+        x_min,
+        x_max,
+        y_min,
+        y_max,
+        )
 
-    width = crop_info.X_MAX - crop_info.X_MIN
-    height = crop_info.Y_MAX - crop_info.Y_MIN
+    w = crop_info.X_MAX - crop_info.X_MIN
+    h = crop_info.Y_MAX - crop_info.Y_MIN
 
-    crop_info = fix_incorrect_aspect_ratio(crop_info, width, height)
+    crop_info = fix_incorrect_aspect_ratio(crop_info, w, h)
     cropped_img = img.crop(
         (crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
     return cropped_img
+
+def find_x_min(pixels, w, h):
+    for x in range(w):
+        for y in range(h):
+            if not pixel_is_white(pixels[x, y]):
+                return x
+
+def find_x_max(pixels, w, h):
+    for x in reversed(range(w)):
+        for y in range(h):
+            if not pixel_is_white(pixels[x, y]):
+                return x
+
+def find_y_min(pixels, w_start, w_end, h):
+    for y in range(h):
+        for x in range(w_start, w_end):
+            if not pixel_is_white(pixels[x, y]):
+                return y
+
+def find_y_max(pixels, w_start, w_end, h):
+    for y in reversed(range(h)):
+        for x in range(w_start, w_end):
+            if not pixel_is_white(pixels[x, y]):
+                return y
 
 
 def extract_info(crop_info, x, y):
@@ -95,13 +125,13 @@ def extract_info(crop_info, x, y):
     return crop_info
 
 
-def fix_incorrect_aspect_ratio(info, width, height):
-    if width > height:
-        offset = (width - height) / 2
+def fix_incorrect_aspect_ratio(info, w, h):
+    if w > h:
+        offset = (w - h) / 2
         info.Y_MIN -= offset
         info.Y_MAX += offset
     else:
-        offset = (height - width) / 2
+        offset = (h - w) / 2
         info.X_MIN -= offset
         info.X_MAX += offset
 
