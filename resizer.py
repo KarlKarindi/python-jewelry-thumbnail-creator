@@ -21,9 +21,20 @@ def start():
 
             og_img = Image.open(PICTURES_DIR_IN + pic_name)
             bg_rgb = find_rgb_of_og_img_bg(og_img)
-            background = Image.new('RGB', (BG_ADDITIONAL_PIXELS + og_img.width,
-                                           BG_ADDITIONAL_PIXELS + og_img.width), (bg_rgb[0], bg_rgb[1], bg_rgb[2]))
+            
+            w = og_img.width
+            h = og_img.height
 
+            bigger_dimension = w
+            if w > h:
+                additional = (w - h)
+            else:
+                additional = (h - w)
+                bigger_dimension = h
+
+
+            background = Image.new('RGB', (additional + bigger_dimension,
+                                           additional + bigger_dimension), (bg_rgb[0], bg_rgb[1], bg_rgb[2]))
             bg_w, bg_h = background.size
             paste_to_background(og_img, background, bg_w,
                                 bg_h, pic_name_without_jpg)
@@ -176,7 +187,7 @@ def paste_to_background(img, background, bg_w, bg_h, img_name):
 
 def find_rgb_of_og_img_bg(img):
     pixels = img.load()
-    width, height = img.width - 1, img.height - 1
+    width, height = img.width, img.height
     for x in range(0, width):
         for y in range(0, height):
             pixel = pixels[x, y]
