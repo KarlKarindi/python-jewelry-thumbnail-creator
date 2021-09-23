@@ -81,8 +81,8 @@ def crop_image(img, pixels):
 
     x_min = find_x_min(pixels, w, h)
     x_max = find_x_max(pixels, w, h)
-    y_min = find_y_min(pixels, x_min, w, h)
-    y_max = find_y_max(pixels, x_min, w, h)
+    y_min = find_y_min(pixels, x_min, x_max, h)
+    y_max = find_y_max(pixels, x_min, x_max, h)
     
     crop_info = CropInfo(
         x_min,
