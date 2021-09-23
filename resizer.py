@@ -1,5 +1,5 @@
 from PIL import Image
-from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, BG_ADDITIONAL_PIXELS, SAVE_FORMAT
+from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, SAVE_FORMAT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -122,19 +122,6 @@ def find_y_max(pixels, w_start, w_end, h):
         for x in range(w_start, w_end):
             if not pixel_is_white(pixels[x, y]):
                 return y
-
-
-def extract_info(crop_info, x, y):
-    if x < crop_info.X_MIN:
-        crop_info.X_MIN = x
-    if x > crop_info.X_MAX:
-        crop_info.X_MAX = x
-    if y < crop_info.Y_MIN:
-        crop_info.Y_MIN = y
-    if y > crop_info.Y_MAX:
-        crop_info.Y_MAX = y
-    return crop_info
-
 
 def fix_incorrect_aspect_ratio(info, w, h):
     if w > h:

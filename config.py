@@ -3,7 +3,6 @@
 # 100 seems to work for watches
 # Use 0 if its a pic from top left to bottom right. Use default if it's anything else.
 OFFSET = 100
-BG_ADDITIONAL_PIXELS = 2500  # Default value 3 * OFFSET
 
 # Set threshold to 100 if it's a self-made picture
 THRESHOLD = 250  # Option either 250 or whatever
