@@ -1,5 +1,5 @@
 from PIL import Image
-from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, DIST, USE_DIST, OFFSET, SAVE_FORMAT
+from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, DIST, USE_DIST, OFFSETS, SAVE_FORMAT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -183,5 +183,7 @@ def find_rgb_of_og_img_bg(img):
                 return pixel
 
 
-for i in range(len(PICTURES_DIRS_IN)):
-    start_resize(PICTURES_DIRS_IN[i], PICTURES_DIRS_OUT[i])
+for _in in PICTURES_DIRS_IN:
+    for i, _out in enumerate(PICTURES_DIRS_OUT):
+        OFFSET = OFFSETS[i]
+        start_resize(_in, _out)
