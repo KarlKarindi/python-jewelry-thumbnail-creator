@@ -1,5 +1,5 @@
 from PIL import Image
-from config import PICTURES_DIR_OUT, PICTURES_DIR_IN, TEMP_DIR_OUT, TEMP_DIR, THRESHOLD, DIST, USE_DIST, OFFSET, SAVE_FORMAT
+from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, DIST, USE_DIST, OFFSET, SAVE_FORMAT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -7,25 +7,26 @@ import os
 import glob
 
 
-def start():
-    pic_files = [f for f in listdir(PICTURES_DIR_IN)
-                 if isfile(join(PICTURES_DIR_IN, f))]
+def start_resize(pictures_dir_in, pictures_dir_out):
+    pic_files = [f for f in listdir(pictures_dir_in)
+                 if isfile(join(pictures_dir_in, f))]
 
-    print("Starting the resizing process!")
-    print("Save location:", PICTURES_DIR_OUT, '\n')
+    print("\nStarting the resizing process!")
+    print("Save location:", pictures_dir_out)
     pic_count = 0
     for pic_name in pic_files:
         if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
             pic_count += 1
             pic_name_without_jpg = pic_name[:pic_name.rindex(".")]
 
-            og_img = Image.open(PICTURES_DIR_IN + pic_name)
+            og_img = Image.open(pictures_dir_in + pic_name)
             bg_rgb = find_rgb_of_og_img_bg(og_img)
             
             w = og_img.width
             h = og_img.height
 
             bigger_dimension = w
+            
             if w > h:
                 additional = (w - h)
             else:
@@ -44,12 +45,12 @@ def start():
             pixels = img_with_background.load()
             cropped_img = crop_image(img_with_background, pixels)
 
-            resize(cropped_img, pic_name_without_jpg + SAVE_FORMAT)
+            resize(pictures_dir_out, cropped_img, pic_name_without_jpg + SAVE_FORMAT)
 
             print("Resized picture #" + str(pic_count) + ":", pic_name,
                   og_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
 
-    print("\nResizing completed!")
+    print("Resizing completed!")
     print("Deleting all temporary files...")
     files = glob.glob(TEMP_DIR_OUT + "/*.png")
     for f in files:
@@ -71,9 +72,9 @@ class CropInfo(object):
         return "X_MIN: {}, X_MAX: {}, Y_MIN: {}, Y_MAX: {}".format(self.X_MIN, self.X_MAX, self.Y_MIN, self.Y_MAX)
 
 
-def resize(cropped_img, pic_name):
+def resize(pictures_dir_out, cropped_img, pic_name):
     new_img = cropped_img.resize((600, 600))
-    new_img.save(PICTURES_DIR_OUT + pic_name, optimize=True)
+    new_img.save(pictures_dir_out + pic_name, optimize=True)
 
 
 def crop_image(img, pixels):
@@ -181,4 +182,6 @@ def find_rgb_of_og_img_bg(img):
             if pixel_is_white(pixel):
                 return pixel
 
-start()
+
+for i in range(len(PICTURES_DIRS_IN)):
+    start_resize(PICTURES_DIRS_IN[i], PICTURES_DIRS_OUT[i])
