@@ -3,7 +3,7 @@
 # 100 seems to work for watches
 # Use 0 if its a pic from top left to bottom right. Use default if it's anything else.
 # Offset 0 seems to look good with watches too
-OFFSETS = [-100, -50, 0, 50, 100,]
+OFFSETS = [100, 50, 0, -50, -100,]
 
 
 # Set threshold to 100 if it's a self-made picture
