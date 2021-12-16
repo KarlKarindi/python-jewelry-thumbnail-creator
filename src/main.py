@@ -108,13 +108,6 @@ def remove_black_borders(img):
     return Image.fromarray(pix2)
 
 
-def pixel_is_white(pixel):
-    r, g, b = pixel[0], pixel[1], pixel[2]
-    return ((r >= THRESHOLD)
-            and (g >= THRESHOLD)
-            and (b >= THRESHOLD))
-
-
 def add_padding(img):
     bg = Image.new('RGB', (img.size[0] + OFFSET, img.size[1] + OFFSET), (255, 255, 255))
     offset = (OFFSET // 2, OFFSET // 2)
