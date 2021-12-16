@@ -45,45 +45,22 @@ def execute(pictures_dir_in, pictures_dir_out):
 
 def find_crop_coords(abspath):
     img = cv2.imread(abspath)
-    original = img.copy()
-    img_blur = cv2.blur(img, (5,5))   
-    #edges = cv.Canny(img, 60, 50)
-    mask = np.zeros(img.shape, dtype=np.uint8)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    thresh = cv2.threshold(gray, 0, 10, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
-
-    cnts = cv2.findContours(opening, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-    cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-    for c in cnts:
-        cv2.drawContours(mask, [c], -1, (255,255,255), -1)
-        break
-
-    close = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=4)
-    close = cv2.cvtColor(close, cv2.COLOR_BGR2GRAY)
-    result = cv2.bitwise_and(original, original, mask=close)
-    result[close==0] = (255,255,255)
-
-    cv2.namedWindow('custom window', cv2.WINDOW_KEEPRATIO)
-    cv2.imshow('custom window', result)
-    cv2.resizeWindow('custom window', 800  , 800)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    edges = cv2.Canny(img, 100, 200)
     
-    
-    
-    #indices = np.where(edges != [0])
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    value = 42 #whatever value you want to add
+    hsv += 50
+    img = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-    indices = np.nonzero(thresh)
-    
+    indices = np.nonzero(edges)
+
     ci = CropInfo(
         min(indices[1]) - 250,
         max(indices[1]) + 250,
         min(indices[0]) - 250,
         max(indices[0]) + 5
     )
+
     return ci
 
 
