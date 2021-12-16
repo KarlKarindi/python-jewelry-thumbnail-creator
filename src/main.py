@@ -1,5 +1,5 @@
 from PIL import Image, ImageChops
-from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, OFFSETS, SAVE_FORMAT, RESIZE_SIZE
+from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, PADDINGS, SAVE_FORMAT, RESIZE_SIZE
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -22,8 +22,7 @@ def execute(pictures_dir_in, pictures_dir_out):
             pic_count += 1
             img = Image.open(pictures_dir_in + name)
             original_size = img.size
-            img = remove_black_borders(crop_img(img))
-            img = add_white_bg(img, img.size)
+            img = add_padding(remove_black_borders(crop_img(img)))
             img = img.resize((600, 600))
             img.save(pictures_dir_out + name, optimize=True)
 
@@ -116,11 +115,9 @@ def pixel_is_white(pixel):
             and (b >= THRESHOLD))
 
 
-def add_white_bg(img, original_size):
-    print(max(original_size))
-    bg = Image.new('RGB', (600 + OFFSET, 600 + OFFSET), (255, 255, 255))
-    img_x, img_y = img.size
-    offset = ((600 + OFFSET - img_x) // 2, (600 + OFFSET - img_y) // 2)
+def add_padding(img):
+    bg = Image.new('RGB', (img.size[0] + OFFSET, img.size[1] + OFFSET), (255, 255, 255))
+    offset = (OFFSET // 2, OFFSET // 2)
     bg.paste(img, offset)
     return bg
 
@@ -142,5 +139,5 @@ def delete_temp_files(files):
 
 for input in PICTURES_DIRS_IN:
     for i, output in enumerate(PICTURES_DIRS_OUT):
-        OFFSET = OFFSETS[i]
+        OFFSET = PADDINGS[i]
         execute(input, output)
