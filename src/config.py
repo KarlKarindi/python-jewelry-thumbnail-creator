@@ -14,7 +14,7 @@ DIST = 5
 
 # # Append / after every folder
 PICTURES_DIRS_IN = [
-                   "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/in/test/"
+                   "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/in/Kameele pildid/"
                    ]
 
 # Must add folder to save as well if it doesn't exist;

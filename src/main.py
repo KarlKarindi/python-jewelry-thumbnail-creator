@@ -24,11 +24,13 @@ def execute(pictures_dir_in, pictures_dir_out):
             pic_count += 1
             abspath = pictures_dir_in + name
 
-            ci = find_edges(abspath)
+            ci = find_crop_coords(abspath)
             img = Image.open(abspath)
-            img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
             original_size = img.size
-            img = add_padding(remove_black_borders(crop_img(img)))
+            
+            # Do the initial crop so that only the piece of jewelerry remains. Reflection is removed
+            img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
+            img = add_padding(remove_black_borders(img))
             img = img.resize((600, 600))
             img.save(pictures_dir_out + name, optimize=True)
 
@@ -41,17 +43,17 @@ def execute(pictures_dir_in, pictures_dir_out):
     delete_temp_files(files)
 
 
-def find_edges(abspath):
+def find_crop_coords(abspath):
     img = cv.imread(abspath, flags=0)
     edges = cv.Canny(img, 100, 200)
 
     indices = np.where(edges != [0])
 
     ci = CropInfo(
-        min(indices[1]) - 50,
-        max(indices[1]) + 50,
-        min(indices[0]) - 50,
-        max(indices[0]) + 35
+        min(indices[1]) - 250,
+        max(indices[1]) + 250,
+        min(indices[0]) - 250,
+        max(indices[0]) + 5
     )
 
     return ci
@@ -67,54 +69,21 @@ class CropInfo(object):
     def __str__(self):
         return "X_MIN: {}, X_MAX: {}, Y_MIN: {}, Y_MAX: {}".format(self.X_MIN, self.X_MAX, self.Y_MIN, self.Y_MAX)
 
-
-def crop_img(img):
-    w, h = img.width, img.height
-    imgnp = np.array(img)
-    elem_width = (max(np.where(imgnp < THRESHOLD)[
-                  1])) - (min(np.where(imgnp < THRESHOLD)[1]))
-    elem_height = (max(np.where(imgnp < THRESHOLD)[
-                   0])) - (min(np.where(imgnp < THRESHOLD)[0]))
-
-    x_mid, y_mid = w / 2, h / 2
-    x_min = x_mid - (elem_width / 2)
-    x_max = x_mid + (elem_width / 2)
-    y_min = y_mid - (elem_height / 2)
-    y_max = y_mid + (elem_height / 2)
-
-    ci = CropInfo(
-        x_min,
-        x_max,
-        y_min,
-        y_max,
-    )
-    img.show()
-
-    w = ci.X_MAX - ci.X_MIN
-    h = ci.Y_MAX - ci.Y_MIN
-    
-    print()
-    print(w, h)
-    print("before", ci)
-    ci = fix_incorrect_aspect_ratio(ci, w, h)
-    print("after", ci)
-    img = img.crop(
-        (ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
-    img.show()
+def add_padding(img):
+    width = img.size[0]
+    height = img.size[1]
+    if width != height:
+        bigger_side = width if width > height else height
+        bg = Image.new('RGB', (bigger_side + PADDING,
+                               bigger_side + PADDING), (255, 255, 255))
+        offset = ((bigger_side - width + PADDING) // 2, (bigger_side - height + PADDING) // 2)
+        bg.paste(img, offset)
+        return bg
     return img
 
 
-def fix_incorrect_aspect_ratio(ci, w, h):
-    if w > h:
-        offset = (w - h) / 2
-        ci.Y_MIN -= offset
-        ci.Y_MAX += offset
-    else:
-        offset = (h - w) / 2
-        ci.X_MIN -= offset
-        ci.X_MAX += offset
-
-    return ci
+def file_is_image(name):
+    return name.lower().endswith(".jpg") or name.lower().endswith(".png")
 
 
 def remove_black_borders(img):
@@ -136,17 +105,6 @@ def remove_black_borders(img):
     return Image.fromarray(pix2)
 
 
-def add_padding(img):
-    bg = Image.new('RGB', (img.size[0] + OFFSET,
-                           img.size[1] + OFFSET), (255, 255, 255))
-    offset = (OFFSET // 2, OFFSET // 2)
-    bg.paste(img, offset)
-    return bg
-
-
-def file_is_image(name):
-    return name.lower().endswith(".jpg") or name.lower().endswith(".png")
-
 
 def delete_temp_files(files):
     print("Deleting all temporary files...")
@@ -161,5 +119,5 @@ def delete_temp_files(files):
 
 for input in PICTURES_DIRS_IN:
     for i, output in enumerate(PICTURES_DIRS_OUT):
-        OFFSET = PADDINGS[i]
+        PADDING = PADDINGS[i]
         execute(input, output)
