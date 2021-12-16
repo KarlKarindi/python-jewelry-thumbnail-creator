@@ -4,7 +4,13 @@
 # Use 0 if its a pic from top left to bottom right. Use default if it's anything else.
 # Offset 0 seems to look good with watches too
 #OFFSETS = [100, 50, 0, -50, -100,]
-PADDINGS = [700]
+PADDINGS = [0]
+
+# When doing edge detection
+ADD_LEFT = 20
+ADD_RIGHT = 20
+ADD_TOP = 5
+ADD_BOT = 2
 
 
 # Set threshold to 100 if it's a self-made picture
@@ -14,7 +20,7 @@ DIST = 5
 
 # # Append / after every folder
 PICTURES_DIRS_IN = [
-                   "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/in/test/"
+                   "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/in/ok/"
                    ]
 
 # Must add folder to save as well if it doesn't exist;

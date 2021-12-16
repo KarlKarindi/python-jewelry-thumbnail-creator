@@ -1,5 +1,5 @@
 from PIL import Image, ImageChops
-from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, PADDINGS, SAVE_FORMAT, RESIZE_SIZE
+from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, PADDINGS, SAVE_FORMAT, RESIZE_SIZE, ADD_TOP, ADD_LEFT, ADD_RIGHT, ADD_BOT
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -49,16 +49,16 @@ def find_crop_coords(abspath):
     
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     value = 42 #whatever value you want to add
-    hsv += 50
+    hsv += 500
     img = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
     indices = np.nonzero(edges)
 
     ci = CropInfo(
-        min(indices[1]) - 250,
-        max(indices[1]) + 250,
-        min(indices[0]) - 250,
-        max(indices[0]) + 5
+        min(indices[1]) - ADD_LEFT,
+        max(indices[1]) + ADD_RIGHT,
+        min(indices[0]) - ADD_TOP,
+        max(indices[0]) + ADD_BOT
     )
 
     return ci
