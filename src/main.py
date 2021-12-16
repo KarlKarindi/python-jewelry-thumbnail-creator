@@ -45,17 +45,25 @@ def execute(pictures_dir_in, pictures_dir_out):
 
 def find_crop_coords(abspath):
     img = cv.imread(abspath, flags=0)
-    edges = cv.Canny(img, 100, 200)
+    img_blur = cv.blur(img, (5,5))   
+    #edges = cv.Canny(img, 60, 50)
+    grad_x = cv.Sobel(img, cv.CV_64F, 1, 0)
+    grad_y = cv.Sobel(img, cv.CV_64F, 0, 1)
+    grad = np.sqrt(grad_x**2 + grad_y**2)
+    grad_norm = (grad * 255 / grad.max()).astype(np.uint8)
+    
+    
+    
+    #indices = np.where(edges != [0])
 
-    indices = np.where(edges != [0])
-
+    indices = np.nonzero(grad_norm)
+    
     ci = CropInfo(
         min(indices[1]) - 250,
         max(indices[1]) + 250,
         min(indices[0]) - 250,
         max(indices[0]) + 5
     )
-
     return ci
 
 
