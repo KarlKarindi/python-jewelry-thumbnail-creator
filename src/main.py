@@ -6,6 +6,9 @@ import numpy as np
 import os
 import glob
 import time
+import cv2 as cv
+from matplotlib import pyplot as plt
+
 
 def execute(pictures_dir_in, pictures_dir_out):
     files = [f for f in listdir(pictures_dir_in)
@@ -18,9 +21,12 @@ def execute(pictures_dir_in, pictures_dir_out):
     for name in files:
         if file_is_image(name):
             start_time = time.time()
-
             pic_count += 1
-            img = Image.open(pictures_dir_in + name)
+            abspath = pictures_dir_in + name
+
+            ci = find_edges(abspath)
+            img = Image.open(abspath)
+            img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
             original_size = img.size
             img = add_padding(remove_black_borders(crop_img(img)))
             img = img.resize((600, 600))
@@ -30,8 +36,25 @@ def execute(pictures_dir_in, pictures_dir_out):
                   original_size, "- time taken:", np.round(time.time() - start_time, 3))
 
     print("Resizing completed!")
-    print("Process completed in:", np.round(time.time() - process_start_time, 3), "seconds")
+    print("Process completed in:", np.round(
+        time.time() - process_start_time, 3), "seconds")
     delete_temp_files(files)
+
+
+def find_edges(abspath):
+    img = cv.imread(abspath, flags=0)
+    edges = cv.Canny(img, 100, 200)
+
+    indices = np.where(edges != [0])
+
+    ci = CropInfo(
+        min(indices[1]) - 50,
+        max(indices[1]) + 50,
+        min(indices[0]) - 50,
+        max(indices[0]) + 35
+    )
+
+    return ci
 
 
 class CropInfo(object):
@@ -65,15 +88,20 @@ def crop_img(img):
         y_min,
         y_max,
     )
+    img.show()
 
     w = ci.X_MAX - ci.X_MIN
     h = ci.Y_MAX - ci.Y_MIN
-
+    
+    print()
+    print(w, h)
+    print("before", ci)
     ci = fix_incorrect_aspect_ratio(ci, w, h)
-    cropped_img = img.crop(
+    print("after", ci)
+    img = img.crop(
         (ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
-
-    return cropped_img
+    img.show()
+    return img
 
 
 def fix_incorrect_aspect_ratio(ci, w, h):
@@ -109,7 +137,8 @@ def remove_black_borders(img):
 
 
 def add_padding(img):
-    bg = Image.new('RGB', (img.size[0] + OFFSET, img.size[1] + OFFSET), (255, 255, 255))
+    bg = Image.new('RGB', (img.size[0] + OFFSET,
+                           img.size[1] + OFFSET), (255, 255, 255))
     offset = (OFFSET // 2, OFFSET // 2)
     bg.paste(img, offset)
     return bg
