@@ -4,7 +4,7 @@
 # Use 0 if its a pic from top left to bottom right. Use default if it's anything else.
 # Offset 0 seems to look good with watches too
 #OFFSETS = [100, 50, 0, -50, -100,]
-OFFSETS = [2500]
+OFFSETS = [100]
 
 
 # Set threshold to 100 if it's a self-made picture
@@ -14,7 +14,7 @@ DIST = 5
 
 # # Append / after every folder
 PICTURES_DIRS_IN = [
-                   "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/in/Kameele pildid/"
+                   "C:/Users/Karl/Projects/picture_resizer/pics_to_resize/in/test/"
                    ]
 
 # Must add folder to save as well if it doesn't exist;
@@ -32,3 +32,5 @@ PICTURES_DIRS_OUT = "C:/Users/Karl/Projects/picture_resizer/resized_pics/out/tes
  
 TEMP_DIR_OUT = "C:/Users/Karl/AppData/Local/picture_resizer/"
 SAVE_FORMAT = ".png"
+
+RESIZE_SIZE = (600, 600)

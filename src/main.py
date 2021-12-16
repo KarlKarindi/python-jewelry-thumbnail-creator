@@ -1,5 +1,5 @@
-from PIL import Image
-from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, OFFSETS, SAVE_FORMAT
+from PIL import Image, ImageChops
+from config import PICTURES_DIRS_OUT, PICTURES_DIRS_IN, TEMP_DIR_OUT, THRESHOLD, OFFSETS, SAVE_FORMAT, RESIZE_SIZE
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -7,40 +7,32 @@ import os
 import glob
 import time
 
+def execute(pictures_dir_in, pictures_dir_out):
+    files = [f for f in listdir(pictures_dir_in)
+             if isfile(join(pictures_dir_in, f))]
 
-def start_resize(pictures_dir_in, pictures_dir_out):
-    pic_files = [f for f in listdir(pictures_dir_in)
-                 if isfile(join(pictures_dir_in, f))]
-
-    print("\nStarting the resizing process!")
-    print("Save location:", pictures_dir_out)
+    print("Starting the resizing process!")
+    print("Save format:", SAVE_FORMAT, "- Save location:", pictures_dir_out)
     pic_count = 0
-    for pic_name in pic_files:
-        if pic_name.lower().endswith(".jpg") or pic_name.lower().endswith(".png"):
+    process_start_time = time.time()
+    for name in files:
+        if file_is_image(name):
+            start_time = time.time()
+
             pic_count += 1
-            pic_name_without_jpg = pic_name[:pic_name.rindex(".")]
+            img = Image.open(pictures_dir_in + name)
+            original_size = img.size
+            img = remove_black_borders(crop_img(img))
+            img = add_white_bg(img, img.size)
+            img = img.resize((600, 600))
+            img.save(pictures_dir_out + name, optimize=True)
 
-            og_img = Image.open(pictures_dir_in + pic_name)
-
-            cropped_img = crop_image(og_img)
-
-            bg_added_img = paste_to_background(
-                cropped_img)
-            new_img = bg_added_img.resize((600, 600))
-            new_img.save(pictures_dir_out + pic_name, optimize=True)
-
-            print("Resized picture #" + str(pic_count) + ":", pic_name,
-                  og_img.size, "- Saved as:", pic_name_without_jpg + SAVE_FORMAT)
+            print("Resized picture #" + str(pic_count) + ":", name,
+                  original_size, "- time taken:", np.round(time.time() - start_time, 3))
 
     print("Resizing completed!")
-    print("Deleting all temporary files...")
-    files = glob.glob(TEMP_DIR_OUT + "/*.png")
-    for f in files:
-        try:
-            os.remove(f)
-        except OSError as e:
-            print("Error: %s : %s" % (f, e.strerror))
-    print("Deleting temporary files completed!")
+    print("Process completed in:", np.round(time.time() - process_start_time, 3), "seconds")
+    delete_temp_files(files)
 
 
 class CropInfo(object):
@@ -54,7 +46,7 @@ class CropInfo(object):
         return "X_MIN: {}, X_MAX: {}, Y_MIN: {}, Y_MAX: {}".format(self.X_MIN, self.X_MAX, self.Y_MIN, self.Y_MAX)
 
 
-def crop_image(img):
+def crop_img(img):
     w, h = img.width, img.height
     imgnp = np.array(img)
     elem_width = (max(np.where(imgnp < THRESHOLD)[
@@ -63,43 +55,58 @@ def crop_image(img):
                    0])) - (min(np.where(imgnp < THRESHOLD)[0]))
 
     x_mid, y_mid = w / 2, h / 2
-    n_x_min = x_mid - (elem_width / 2)
-    n_x_max = x_mid + (elem_width / 2)
-    n_y_min = y_mid - (elem_height / 2)
-    n_y_max = y_mid + (elem_height / 2)
+    x_min = x_mid - (elem_width / 2)
+    x_max = x_mid + (elem_width / 2)
+    y_min = y_mid - (elem_height / 2)
+    y_max = y_mid + (elem_height / 2)
 
-    crop_info = CropInfo(
-        n_x_min,
-        n_x_max,
-        n_y_min,
-        n_y_max,
+    ci = CropInfo(
+        x_min,
+        x_max,
+        y_min,
+        y_max,
     )
 
-    w = crop_info.X_MAX - crop_info.X_MIN
-    h = crop_info.Y_MAX - crop_info.Y_MIN
+    w = ci.X_MAX - ci.X_MIN
+    h = ci.Y_MAX - ci.Y_MIN
 
-    crop_info = fix_incorrect_aspect_ratio(crop_info, w, h)
+    ci = fix_incorrect_aspect_ratio(ci, w, h)
     cropped_img = img.crop(
-        (crop_info.X_MIN, crop_info.Y_MIN, crop_info.X_MAX, crop_info.Y_MAX))
-    
+        (ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
 
     return cropped_img
 
 
-def fix_incorrect_aspect_ratio(info, w, h):
+def fix_incorrect_aspect_ratio(ci, w, h):
     if w > h:
         offset = (w - h) / 2
-        info.Y_MIN -= offset
-        info.Y_MAX += offset
+        ci.Y_MIN -= offset
+        ci.Y_MAX += offset
     else:
         offset = (h - w) / 2
-        info.X_MIN -= offset
-        info.X_MAX += offset
-        
-    print("w", w, "h", h)
-    print(info)
-    # TODO: PROBLEM HERE WITH BLACK BOXES
-    return info
+        ci.X_MIN -= offset
+        ci.X_MAX += offset
+
+    return ci
+
+
+def remove_black_borders(img):
+    pix = np.array(img)
+    black = np.array([0, 0, 0])
+    white = np.array([255, 255, 255])
+
+    pix2 = pix.copy()
+    dim = pix.shape
+
+    for n in range(dim[0]):
+        if (pix[n, :] == black).all():
+            pix2[n, :] = white
+
+    for n in range(dim[1]):
+        if (pix[:, n] == black).all():
+            pix2[:, n] = white
+
+    return Image.fromarray(pix2)
 
 
 def pixel_is_white(pixel):
@@ -109,27 +116,31 @@ def pixel_is_white(pixel):
             and (b >= THRESHOLD))
 
 
-def paste_to_background(img):
-    background = Image.new('RGB', (600 + OFFSET,
-                                   600 + OFFSET), (255, 255, 255))
-    img_w, img_h = img.size
-    offset = ((600 + OFFSET - img_w) // 2, (600 + OFFSET - img_h) // 2)
-    background.paste(img, offset)
-    return background
+def add_white_bg(img, original_size):
+    print(max(original_size))
+    bg = Image.new('RGB', (600 + OFFSET, 600 + OFFSET), (255, 255, 255))
+    img_x, img_y = img.size
+    offset = ((600 + OFFSET - img_x) // 2, (600 + OFFSET - img_y) // 2)
+    bg.paste(img, offset)
+    return bg
 
 
-def find_rgb_of_og_img_bg(img):
-    pixels = img.load()
-    width, height = img.width, img.height
-    for x in range(0, width):
-        for y in range(0, height):
-            pixel = pixels[x, y]
-            if pixel_is_white(pixel):
-                return pixel
-    return (0, 0, 0)
+def file_is_image(name):
+    return name.lower().endswith(".jpg") or name.lower().endswith(".png")
 
 
-for _in in PICTURES_DIRS_IN:
-    for i, _out in enumerate(PICTURES_DIRS_OUT):
+def delete_temp_files(files):
+    print("Deleting all temporary files...")
+    files = glob.glob(TEMP_DIR_OUT + "/*.png")
+    for f in files:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+    print("Deleting temporary files completed!")
+
+
+for input in PICTURES_DIRS_IN:
+    for i, output in enumerate(PICTURES_DIRS_OUT):
         OFFSET = OFFSETS[i]
-        start_resize(_in, _out)
+        execute(input, output)
