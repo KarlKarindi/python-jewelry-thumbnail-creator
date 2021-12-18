@@ -4,3 +4,6 @@ resized_pics/
 pics_to_resize
 pics_to_resize/
 .vscode/settings.json
+.mypy_cache
+.ionide
+__pycache__
