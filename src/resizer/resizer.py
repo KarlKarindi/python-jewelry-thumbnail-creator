@@ -18,22 +18,34 @@ def handleArgs(args):
         args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 5, 2
     return args
 
-
-def execute(args):
-    files = [f for f in listdir(args.pictures_dir_in)
-             if isfile(join(args.pictures_dir_in, f))]
+def create_output_dir(input_dir):
+    output_dir = os.path.join(input_dir + "600x600/")
+    try:
+        os.mkdir(output_dir)
+    except:
+        print("File already exists")
+    return output_dir
+    
+def execute(picture_dirs_in, args):
+    if not picture_dirs_in.endswith("/"):
+        picture_dirs_in += "/"
+        
+    output_dir = create_output_dir(picture_dirs_in)
+    
+    files = [f for f in listdir(picture_dirs_in)
+             if isfile(join(picture_dirs_in, f))]
 
     args = handleArgs(args)
 
     print("Save format:", args.save_format,
-          "- Save location:", args.pictures_dir_out)
+          "- Save location:", output_dir)
     pic_count = 0
     process_start_time = time.time()
     for name in files:
         if file_is_image(name):
             start_time = time.time()
             pic_count += 1
-            abspath = args.pictures_dir_in + name
+            abspath = picture_dirs_in + name
 
             ci = find_crop_coords(abspath, args)
             img = Image.open(abspath)
@@ -43,7 +55,7 @@ def execute(args):
             img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
             img = add_padding(remove_black_borders(img), args)
             img = img.resize((600, 600))
-            img.save(args.pictures_dir_out + name, optimize=True)
+            img.save(output_dir + name, optimize=True)
 
             print("Resized picture #" + str(pic_count) + ":", name,
                   original_size, "- time taken:", np.round(time.time() - start_time, 3))
@@ -131,9 +143,3 @@ def delete_temp_files(files, temp_dir_out):
         except OSError as e:
             print("Error: %s : %s" % (f, e.strerror))
     print("Deleting temporary files completed!")
-
-
-# for input in PICTURES_DIRS_IN:
- #   for i, output in enumerate(PICTURES_DIRS_OUT):
-  #      PADDING = PADDINGS[i]
-   #     execute(input, output)
