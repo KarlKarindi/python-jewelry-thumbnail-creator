@@ -19,7 +19,7 @@ def handleArgs(args):
     return args
 
 def create_output_dir(input_dir):
-    output_dir = os.path.join(input_dir + "600x600/")
+    output_dir = input_dir + "600x600/"
     try:
         os.mkdir(output_dir)
     except:
