@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\untitled.ui'
+# Form implementation generated from reading ui file 'src/ui/menu.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -9,19 +9,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from src.resizer import resizer
-from src.resizer.args import Args
-import numpy as np
-
-
-def toggle_reflection_removal():
-    ARGS.do_reflection_removal = not ARGS.do_reflection_removal
-
-
-def execute():
-    process_time = resizer.execute(ARGS)
-    print("Process completed in:", np.round(process_time, 3), "seconds")
-    return
 
 
 class Ui_MainWindow(object):
@@ -33,17 +20,11 @@ class Ui_MainWindow(object):
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(590, 500, 181, 41))
         self.pushButton.setCheckable(False)
-        self.pushButton.clicked.connect(execute)
         self.pushButton.setObjectName("pushButton")
-        
-        
         self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
-        self.checkBox.setGeometry(QtCore.QRect(60, 60, 200, 21))
-        self.checkBox.setObjectName("checkBoxPeegeldus")
-        self.checkBox.clicked.connect(toggle_reflection_removal)
+        self.checkBox.setGeometry(QtCore.QRect(50, 50, 241, 21))
         self.checkBox.setChecked(True)
-        
-        
+        self.checkBox.setObjectName("checkBox")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
@@ -58,16 +39,13 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Kamee Pildiparandaja"))
-        self.pushButton.setText(_translate(
-            "MainWindow", "Alusta piltide vähendamist"))
-        self.checkBox.setText(_translate(
-            "MainWindow", "Peegelduse eemaldamine"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.pushButton.setText(_translate("MainWindow", "Alusta piltide vähendamist"))
+        self.checkBox.setText(_translate("MainWindow", "Peegelduse eemaldamine"))
 
 
 if __name__ == "__main__":
     import sys
-    ARGS = Args()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

@@ -7,7 +7,7 @@
 class Args(object):
 
     def __init__(self,
-                 padding=100,
+                 padding=1000,
                  add_left=100,
                  add_right=100,
                  add_top=5,
@@ -18,7 +18,8 @@ class Args(object):
                  pictures_dir_out="C:/Users/Karl/Projects/ThumbnailCreator/resized_pics/out/test/",
                  temp_dir_out="C:/Users/Karl/AppData/Local/ThumbnailCreator/",
                  save_format=".png",
-                 resize_size=(600, 600)
+                 resize_size=(600, 600),
+                 do_reflection_removal = True
                  ):
         self.padding = padding
         self.add_left = add_left
@@ -32,3 +33,7 @@ class Args(object):
         self.temp_dir_out = temp_dir_out
         self.save_format = save_format
         self.resize = resize_size
+        
+        self.do_reflection_removal = do_reflection_removal
+        self.canny_min_threshold = 100
+        self.canny_max_threshold = 200

@@ -9,11 +9,22 @@ import time
 import cv2
 
 
+def handleArgs(args):
+    if args.do_reflection_removal:
+        args.canny_min_threshold, args.canny_max_threshold = 100, 200
+        args.add_left, args.add_right, args.add_top, args.add_bottom = 10, 10, 10, 10
+    else:
+        args.canny_min_threshold, args.canny_max_threshold = 0, 0
+        args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 5, 2
+    return args
+
+
 def execute(args):
     files = [f for f in listdir(args.pictures_dir_in)
              if isfile(join(args.pictures_dir_in, f))]
 
-    print("Starting the resizing process!")
+    args = handleArgs(args)
+
     print("Save format:", args.save_format,
           "- Save location:", args.pictures_dir_out)
     pic_count = 0
@@ -38,14 +49,14 @@ def execute(args):
                   original_size, "- time taken:", np.round(time.time() - start_time, 3))
 
     print("Resizing completed!")
-    print("Process completed in:", np.round(
-        time.time() - process_start_time, 3), "seconds")
     delete_temp_files(files, args.temp_dir_out)
+    return time.time() - process_start_time
 
 
-def find_crop_coords(abspath, settings):
+def find_crop_coords(abspath, args):
     img = cv2.imread(abspath)
-    edges = cv2.Canny(img, 100, 200)
+
+    edges = cv2.Canny(img, args.canny_min_threshold, args.canny_max_threshold)
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv += 500
@@ -54,10 +65,10 @@ def find_crop_coords(abspath, settings):
     indices = np.nonzero(edges)
 
     ci = CropInfo(
-        min(indices[1]) - settings.add_left,
-        max(indices[1]) + settings.add_right,
-        min(indices[0]) - settings.add_top,
-        max(indices[0]) + settings.add_bot
+        min(indices[1]) - args.add_left,
+        max(indices[1]) + args.add_right,
+        min(indices[0]) - args.add_top,
+        max(indices[0]) + args.add_bot
     )
 
     return ci
@@ -74,15 +85,15 @@ class CropInfo(object):
         return "X_MIN: {}, X_MAX: {}, Y_MIN: {}, Y_MAX: {}".format(self.X_MIN, self.X_MAX, self.Y_MIN, self.Y_MAX)
 
 
-def add_padding(img, settings):
+def add_padding(img, args):
     width = img.size[0]
     height = img.size[1]
     if width != height:
         bigger_side = width if width > height else height
-        bg = Image.new('RGB', (bigger_side + settings.padding,
-                               bigger_side + settings.padding), (255, 255, 255))
-        offset = ((bigger_side - width + settings.padding) // 2,
-                  (bigger_side - height + settings.padding) // 2)
+        bg = Image.new('RGB', (bigger_side + args.padding,
+                               bigger_side + args.padding), (255, 255, 255))
+        offset = ((bigger_side - width + args.padding) // 2,
+                  (bigger_side - height + args.padding) // 2)
         bg.paste(img, offset)
         return bg
     return img

@@ -31,7 +31,8 @@ class Ui_MainWindow(object):
         self.pushButton.setCheckable(False)
         self.checkBox = QCheckBox(self.centralwidget)
         self.checkBox.setObjectName(u"checkBox")
-        self.checkBox.setGeometry(QRect(60, 70, 81, 21))
+        self.checkBox.setGeometry(QRect(50, 50, 241, 21))
+        self.checkBox.setChecked(True)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -49,6 +50,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Alusta piltide v\u00e4hendamist", None))
-        self.checkBox.setText(QCoreApplication.translate("MainWindow", u"CheckBox", None))
+        self.checkBox.setText(QCoreApplication.translate("MainWindow", u"Peegelduse eemaldamine", None))
     # retranslateUi
 
