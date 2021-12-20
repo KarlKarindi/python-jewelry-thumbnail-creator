@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QSlider, QSlider
+from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QSlider, QSlider, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt, QUrl
 from src.resizer import resizer
 from src.resizer.args import Args
@@ -54,17 +54,22 @@ class AppDemo(QMainWindow):
         
         self.lstBoxView = ListboxWidget(self)
         
+        self.paddingLabel = QLabel('0', self)
+        self.paddingLabel.setText(str(10)) # This sets the initial slider label value
+        self.paddingLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.paddingLabel.setMinimumWidth(80)
+        self.paddingLabel.setGeometry(620, 100, 200, 50)
+        
         self.paddingSlider = QtWidgets.QSlider(Qt.Horizontal, self)
+        self.paddingSlider.setSliderPosition(100) # This sets the initial slider value
         self.paddingSlider.setGeometry(800, 100, 200, 50)
         self.paddingSlider.setRange(0, 200)
         self.paddingSlider.setPageStep(20)
-        
         self.paddingSlider.valueChanged.connect(self.change_padding)
-        
-        
+        self.paddingSlider.setFocusPolicy(Qt.NoFocus)
         
         self.reflectionCheckBox = QtWidgets.QCheckBox("Eemalda peegeldus", self)
-        self.reflectionCheckBox.setGeometry(QtCore.QRect(800, 150, 200, 50))
+        self.reflectionCheckBox.setGeometry(QtCore.QRect(800, 180, 200, 50))
         self.reflectionCheckBox.setObjectName("checkBoxPeegeldus")
         self.reflectionCheckBox.clicked.connect(self.toggle_reflection_removal)
         self.reflectionCheckBox.setChecked(True)
@@ -89,6 +94,7 @@ class AppDemo(QMainWindow):
         ARGS.do_reflection_removal = not ARGS.do_reflection_removal
 
     def change_padding(self, value):
+        self.paddingLabel.setText(str(value // 10))
         ARGS.padding = value * 10
 
 ARGS = Args()

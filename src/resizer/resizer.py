@@ -12,7 +12,7 @@ import cv2
 def handleArgs(args):
     if args.do_reflection_removal:
         args.canny_min_threshold, args.canny_max_threshold = 100, 200
-        args.add_left, args.add_right, args.add_top, args.add_bottom = 10, 10, 10, 10
+        args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 100, 5
     else:
         args.canny_min_threshold, args.canny_max_threshold = 0, 0
         args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 5, 2
