@@ -93,7 +93,8 @@ class AppDemo(QMainWindow):
                 img_abspath = input_dir + ifn
                 save_loc = output_dir + ifn
                 
-                resizer.resize_img(img_abspath, save_loc, args)
+                result = resizer.resize_img(img_abspath, save_loc, args)
+                print(result)
 
     def getInputDirs(self):
         lbw = self.lstBoxView

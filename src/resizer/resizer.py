@@ -10,6 +10,17 @@ import cv2
 from src.resizer import helper
 
 
+class ResizeResult(object):
+
+    def __init__(self, file_name, original_size, spent_time):
+        self.file_name = file_name
+        self.original_size = original_size
+        self.spent_time = np.round(spent_time, 3)
+
+    def __str__(self):
+        return "spent time: {}, original_size: {}, file name: {}".format(self.spent_time, self.original_size, self.file_name)
+
+
 def handleArgs(args):
     if args.do_reflection_removal:
         args.canny_min_threshold, args.canny_max_threshold = 100, 200
@@ -31,16 +42,22 @@ def setup(input_dirs, args):
 
 
 def resize_img(img_abspath, save_loc, args):
-
+    start_time = time.time()
     ci = find_crop_coords(img_abspath, args)
     img = Image.open(img_abspath)
+    original_size = img.size
 
     # Do the initial crop so that only the piece of jewelerry remains. Reflection is removed
     img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
     img = add_padding(remove_black_borders(img), args)
     img = img.resize((600, 600))
     img.save(save_loc, optimize=True)
-    return
+
+    return ResizeResult(
+        spent_time=time.time() - start_time,
+        file_name=save_loc,
+        original_size=original_size
+    )
 
 
 def find_crop_coords(abspath, args):
