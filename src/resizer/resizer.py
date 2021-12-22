@@ -24,7 +24,7 @@ class ResizeResult(object):
 def handleArgs(args):
     if args.do_reflection_removal:
         args.canny_min_threshold, args.canny_max_threshold = 100, 200
-        args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 100, 5
+        args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 30, 5
     else:
         args.canny_min_threshold, args.canny_max_threshold = 0, 0
         args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 5, 2
@@ -36,9 +36,10 @@ def setup(input_dirs, args):
     input_dirs = helper.fix_input_dirs_names(input_dirs)
     output_dirs = helper.create_output_dirs(input_dirs)
     img_file_names = helper.create_img_file_names(input_dirs)
+    total_picture_count = helper.count_total_pictures(img_file_names)
     args = handleArgs(args)
 
-    return list(zip(input_dirs, output_dirs, img_file_names)), args
+    return list(zip(input_dirs, output_dirs, img_file_names)), args, total_picture_count
 
 
 def resize_img(img_abspath, save_loc, args):

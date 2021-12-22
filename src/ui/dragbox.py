@@ -43,7 +43,6 @@ class ListboxWidget(QListWidget):
         else:
             event.ignore()
 
-
 class AppDemo(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -54,7 +53,7 @@ class AppDemo(QMainWindow):
 
         self.paddingLabel = QLabel('0', self)
         # This sets the initial slider label value
-        self.paddingLabel.setText(str(10))
+        self.paddingLabel.setText("Lisataust: " + str(10))
         self.paddingLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         self.paddingLabel.setMinimumWidth(80)
         self.paddingLabel.setGeometry(620, 100, 200, 50)
@@ -75,6 +74,23 @@ class AppDemo(QMainWindow):
         self.reflectionCheckBox.clicked.connect(self.toggle_reflection_removal)
         self.reflectionCheckBox.setChecked(True)
 
+        self.taskProgressLabel = QLabel('0/0', self)
+        self.taskProgressLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.taskProgressLabel.setMinimumWidth(80)
+        self.taskProgressLabel.setGeometry(620, 300, 200, 50)
+
+        self.taskResizeProgressLabel = QLabel('0/0', self)
+        self.taskResizeProgressLabel.setAlignment(
+            Qt.AlignCenter | Qt.AlignVCenter)
+        self.taskResizeProgressLabel.setMinimumWidth(80)
+        self.taskResizeProgressLabel.setGeometry(620, 330, 200, 50)
+        
+        self.totalResizeProgressLabel = QLabel('0/0', self)
+        self.totalResizeProgressLabel.setAlignment(
+            Qt.AlignCenter | Qt.AlignVCenter)
+        self.totalResizeProgressLabel.setMinimumWidth(80)
+        self.totalResizeProgressLabel.setGeometry(620, 360, 200, 50)
+
         self.startButton = QPushButton("Alusta", self)
         self.startButton.setGeometry(800, 400, 200, 50)
         self.startButton.clicked.connect(
@@ -84,17 +100,28 @@ class AppDemo(QMainWindow):
         if len(input_dirs) <= 0:
             raise Exception("Sisesta sisendkaust")
 
-        data, args = resizer.setup(input_dirs, args)
-        for task in data:
+        data, args, total_picture_count = resizer.setup(input_dirs, args)
+        total_resizes_done = 0
+
+        for i, task in enumerate(data):
             input_dir = task[0]
             output_dir = task[1]
             img_file_names = task[2]
-            for ifn in img_file_names:
+            len_img_file_names = len(img_file_names)
+
+            self.taskProgressLabel.setText("Kaust: " + str(i + 1) + "/" + str(len(data)))
+            for j, ifn in enumerate(img_file_names):
                 img_abspath = input_dir + ifn
                 save_loc = output_dir + ifn
-                
+
                 result = resizer.resize_img(img_abspath, save_loc, args)
-                print(result)
+                total_resizes_done += 1
+                self.taskResizeProgressLabel.setText(
+                    "Pildid kaustas: " + str(j + 1) + "/" + str(len_img_file_names))
+                
+                
+                self.totalResizeProgressLabel.setText("Pilte kokku: " + str(total_resizes_done) + "/" + str(total_picture_count))
+                app.processEvents()
 
     def getInputDirs(self):
         lbw = self.lstBoxView
@@ -104,7 +131,7 @@ class AppDemo(QMainWindow):
         ARGS.do_reflection_removal = not ARGS.do_reflection_removal
 
     def change_padding(self, value):
-        self.paddingLabel.setText(str(value // 10))
+        self.paddingLabel.setText("Lisataust: " + str(value // 10))
         ARGS.padding = value * 10
 
 

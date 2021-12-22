@@ -19,7 +19,7 @@ def create_output_dirs(input_dirs):
         try:
             os.mkdir(output_dir)
         except:
-            print("Output directory already exists for", idir)
+            continue
 
     return output_dirs
 
@@ -31,6 +31,12 @@ def create_img_file_names(input_dirs):
                   if isfile(join(idir, f)) and file_is_image(f)]
         img_file_names.append(result)
     return img_file_names
+
+def count_total_pictures(img_file_names):
+    sum = 0
+    for names in img_file_names:
+        sum += len(names)
+    return sum
 
 def file_is_image(name):
     return name.lower().endswith(".jpg") or name.lower().endswith(".png")
