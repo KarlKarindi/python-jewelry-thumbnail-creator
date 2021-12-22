@@ -7,7 +7,7 @@ import os
 import glob
 import time
 import cv2
-
+from src.resizer import helper
 
 def handleArgs(args):
     if args.do_reflection_removal:
@@ -18,19 +18,12 @@ def handleArgs(args):
         args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 5, 2
     return args
 
-def create_output_dir(input_dir):
-    output_dir = input_dir + "600x600/"
-    try:
-        os.mkdir(output_dir)
-    except:
-        print("File already exists")
-    return output_dir
     
-def execute(picture_dirs_in, args):
+def resize_img(picture_dirs_in, args):
     if not picture_dirs_in.endswith("/"):
         picture_dirs_in += "/"
         
-    output_dir = create_output_dir(picture_dirs_in)
+    output_dir = helper.create_output_dir(picture_dirs_in)
     
     files = [f for f in listdir(picture_dirs_in)
              if isfile(join(picture_dirs_in, f))]
@@ -42,7 +35,7 @@ def execute(picture_dirs_in, args):
     pic_count = 0
     process_start_time = time.time()
     for name in files:
-        if file_is_image(name):
+        if helper.file_is_image(name):
             start_time = time.time()
             pic_count += 1
             abspath = picture_dirs_in + name
@@ -61,7 +54,6 @@ def execute(picture_dirs_in, args):
                   original_size, "- time taken:", np.round(time.time() - start_time, 3))
 
     print("Resizing completed!")
-    delete_temp_files(files, args.temp_dir_out)
     return time.time() - process_start_time
 
 
@@ -111,10 +103,6 @@ def add_padding(img, args):
     return img
 
 
-def file_is_image(name):
-    return name.lower().endswith(".jpg") or name.lower().endswith(".png")
-
-
 def remove_black_borders(img):
     pix = np.array(img)
     black = np.array([0, 0, 0])
@@ -132,14 +120,3 @@ def remove_black_borders(img):
             pix2[:, n] = white
 
     return Image.fromarray(pix2)
-
-
-def delete_temp_files(files, temp_dir_out):
-    print("Deleting all temporary files...")
-    files = glob.glob(temp_dir_out + "/*.png")
-    for f in files:
-        try:
-            os.remove(f)
-        except OSError as e:
-            print("Error: %s : %s" % (f, e.strerror))
-    print("Deleting temporary files completed!")

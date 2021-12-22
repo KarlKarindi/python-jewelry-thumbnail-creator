@@ -19,7 +19,7 @@ def toggle_reflection_removal():
 
 
 def execute():
-    process_time = resizer.execute(ARGS)
+    process_time = resizer.resize_img(ARGS)
     print("Process completed in:", np.round(process_time, 3), "seconds")
     return
 
