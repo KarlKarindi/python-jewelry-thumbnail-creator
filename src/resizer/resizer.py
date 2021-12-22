@@ -9,6 +9,7 @@ import time
 import cv2
 from src.resizer import helper
 
+
 def handleArgs(args):
     if args.do_reflection_removal:
         args.canny_min_threshold, args.canny_max_threshold = 100, 200
@@ -18,43 +19,35 @@ def handleArgs(args):
         args.add_left, args.add_right, args.add_top, args.add_bottom = 100, 100, 5, 2
     return args
 
-    
-def resize_img(picture_dirs_in, args):
-    if not picture_dirs_in.endswith("/"):
-        picture_dirs_in += "/"
-        
-    output_dir = helper.create_output_dir(picture_dirs_in)
-    
-    files = [f for f in listdir(picture_dirs_in)
-             if isfile(join(picture_dirs_in, f))]
 
+def setup(input_dirs, args):
+    
+    input_dirs = helper.fix_input_dirs_names(input_dirs)
+    output_dirs = helper.create_output_dirs(input_dirs)
+    img_file_names = helper.create_img_file_names(input_dirs)
     args = handleArgs(args)
+    
+    return input_dirs, output_dirs, img_file_names, args
+
+
+def resize_img(input_dir, img_name, output_dir, args):
 
     print("Save format:", args.save_format,
           "- Save location:", output_dir)
-    pic_count = 0
-    process_start_time = time.time()
-    for name in files:
-        if helper.file_is_image(name):
-            start_time = time.time()
-            pic_count += 1
-            abspath = picture_dirs_in + name
 
-            ci = find_crop_coords(abspath, args)
-            img = Image.open(abspath)
-            original_size = img.size
+    abspath = input_dir + img_name
 
-            # Do the initial crop so that only the piece of jewelerry remains. Reflection is removed
-            img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
-            img = add_padding(remove_black_borders(img), args)
-            img = img.resize((600, 600))
-            img.save(output_dir + name, optimize=True)
+    ci = find_crop_coords(abspath, args)
+    img = Image.open(abspath)
 
-            print("Resized picture #" + str(pic_count) + ":", name,
-                  original_size, "- time taken:", np.round(time.time() - start_time, 3))
+    # Do the initial crop so that only the piece of jewelerry remains. Reflection is removed
+    img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
+    img = add_padding(remove_black_borders(img), args)
+    img = img.resize((600, 600))
+    img.save(output_dir + img_name, optimize=True)
 
     print("Resizing completed!")
-    return time.time() - process_start_time
+    return
 
 
 def find_crop_coords(abspath, args):

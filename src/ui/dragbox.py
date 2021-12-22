@@ -83,8 +83,9 @@ class AppDemo(QMainWindow):
     def handle_start_pressed(self, input_dirs, args):
         if len(input_dirs) <= 0:
             raise Exception("Sisesta sisendkaust")
-            return
 
+        input_dirs, output_dirs, img_file_names, args = resizer.setup(input_dirs, args)
+        print(input_dirs, output_dirs, img_file_names)
         resizer.resize_img(input_dirs[0], args)
 
     def getInputDirs(self):
