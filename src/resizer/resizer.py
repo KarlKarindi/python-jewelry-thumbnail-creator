@@ -21,32 +21,25 @@ def handleArgs(args):
 
 
 def setup(input_dirs, args):
-    
+
     input_dirs = helper.fix_input_dirs_names(input_dirs)
     output_dirs = helper.create_output_dirs(input_dirs)
     img_file_names = helper.create_img_file_names(input_dirs)
     args = handleArgs(args)
-    
-    return input_dirs, output_dirs, img_file_names, args
+
+    return list(zip(input_dirs, output_dirs, img_file_names)), args
 
 
-def resize_img(input_dir, img_name, output_dir, args):
+def resize_img(img_abspath, save_loc, args):
 
-    print("Save format:", args.save_format,
-          "- Save location:", output_dir)
-
-    abspath = input_dir + img_name
-
-    ci = find_crop_coords(abspath, args)
-    img = Image.open(abspath)
+    ci = find_crop_coords(img_abspath, args)
+    img = Image.open(img_abspath)
 
     # Do the initial crop so that only the piece of jewelerry remains. Reflection is removed
     img = img.crop((ci.X_MIN, ci.Y_MIN, ci.X_MAX, ci.Y_MAX))
     img = add_padding(remove_black_borders(img), args)
     img = img.resize((600, 600))
-    img.save(output_dir + img_name, optimize=True)
-
-    print("Resizing completed!")
+    img.save(save_loc, optimize=True)
     return
 
 

@@ -84,9 +84,16 @@ class AppDemo(QMainWindow):
         if len(input_dirs) <= 0:
             raise Exception("Sisesta sisendkaust")
 
-        input_dirs, output_dirs, img_file_names, args = resizer.setup(input_dirs, args)
-        print(input_dirs, output_dirs, img_file_names)
-        resizer.resize_img(input_dirs[0], args)
+        data, args = resizer.setup(input_dirs, args)
+        for task in data:
+            input_dir = task[0]
+            output_dir = task[1]
+            img_file_names = task[2]
+            for ifn in img_file_names:
+                img_abspath = input_dir + ifn
+                save_loc = output_dir + ifn
+                
+                resizer.resize_img(img_abspath, save_loc, args)
 
     def getInputDirs(self):
         lbw = self.lstBoxView
