@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QSlider, QSlider, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt, QUrl
 from src.resizer import resizer
@@ -47,7 +48,7 @@ class AppDemo(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.resize(1200, 600)
+        self.setFixedSize(1000, 600)
 
         self.lstBoxView = ListboxWidget(self)
 
@@ -55,51 +56,70 @@ class AppDemo(QMainWindow):
         # This sets the initial slider label value
         self.paddingLabel.setText("Lisataust: " + str(10))
         self.paddingLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        self.paddingLabel.setMinimumWidth(80)
-        self.paddingLabel.setGeometry(620, 100, 200, 50)
+        self.paddingLabel.setMinimumWidth(60)
+        self.paddingLabel.setGeometry(590, 50, 200, 50)
 
         self.paddingSlider = QtWidgets.QSlider(Qt.Horizontal, self)
         # This sets the initial slider value
         self.paddingSlider.setSliderPosition(100)
-        self.paddingSlider.setGeometry(800, 100, 200, 50)
+        self.paddingSlider.setGeometry(750, 50, 200, 50)
         self.paddingSlider.setRange(0, 200)
         self.paddingSlider.setPageStep(20)
         self.paddingSlider.valueChanged.connect(self.change_padding)
         self.paddingSlider.setFocusPolicy(Qt.NoFocus)
-
+        
         self.reflectionCheckBox = QtWidgets.QCheckBox(
             "Eemalda peegeldus", self)
-        self.reflectionCheckBox.setGeometry(QtCore.QRect(800, 180, 200, 50))
+        self.reflectionCheckBox.setGeometry(QtCore.QRect(650, 130, 200, 50))
         self.reflectionCheckBox.setObjectName("checkBoxPeegeldus")
         self.reflectionCheckBox.clicked.connect(self.toggle_reflection_removal)
         self.reflectionCheckBox.setChecked(True)
-
-        self.taskProgressLabel = QLabel('0/0', self)
-        self.taskProgressLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        self.taskProgressLabel.setMinimumWidth(80)
-        self.taskProgressLabel.setGeometry(620, 300, 200, 50)
-
-        self.taskResizeProgressLabel = QLabel('0/0', self)
-        self.taskResizeProgressLabel.setAlignment(
-            Qt.AlignCenter | Qt.AlignVCenter)
-        self.taskResizeProgressLabel.setMinimumWidth(80)
-        self.taskResizeProgressLabel.setGeometry(620, 330, 200, 50)
         
-        self.totalResizeProgressLabel = QLabel('0/0', self)
+
+
+        self.status = QLabel('← Tiri väljale kaust/kaustad', self)
+        self.status.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.status.setMinimumWidth(400)
+        self.status.setMaximumWidth(400)
+        self.status.setFont(QFont("Arial", 14))
+        self.status.setGeometry(650, 350, 200, 50)
+        self.status.resize(400, 30)
+
+        self.taskProgressLabel = QLabel('Töödeldud kaustade arv: 0/0', self)
+        self.taskProgressLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.taskProgressLabel.setMinimumWidth(400)
+        self.taskProgressLabel.setMaximumWidth(400)
+        self.taskProgressLabel.resize(400, 30)
+        self.taskProgressLabel.setGeometry(650, 390, 200, 50)
+
+        self.taskResizeProgressLabel = QLabel('Kaustas töödeldud piltide arv: 0/0', self)
+        self.taskResizeProgressLabel.setAlignment(
+            Qt.AlignLeft | Qt.AlignVCenter)
+        self.taskResizeProgressLabel.setMinimumWidth(400)
+        self.taskResizeProgressLabel.setMaximumWidth(400)
+        self.taskResizeProgressLabel.resize(400, 30)
+        self.taskResizeProgressLabel.setGeometry(650, 420, 200, 50)
+        
+        self.totalResizeProgressLabel = QLabel('Töödeldud piltide arv kokku: 0/0', self)
         self.totalResizeProgressLabel.setAlignment(
-            Qt.AlignCenter | Qt.AlignVCenter)
-        self.totalResizeProgressLabel.setMinimumWidth(80)
-        self.totalResizeProgressLabel.setGeometry(620, 360, 200, 50)
+            Qt.AlignLeft | Qt.AlignVCenter)
+        self.totalResizeProgressLabel.setMinimumWidth(400)
+        self.totalResizeProgressLabel.setMaximumWidth(400)
+        self.totalResizeProgressLabel.resize(400, 30)
+        self.totalResizeProgressLabel.setGeometry(650, 450, 200, 50)
 
         self.startButton = QPushButton("Alusta", self)
-        self.startButton.setGeometry(800, 400, 200, 50)
+        self.startButton.setGeometry(650, 500, 200, 50)
         self.startButton.clicked.connect(
             lambda: self.handle_start_pressed(self.getInputDirs(), ARGS))
 
     def handle_start_pressed(self, input_dirs, args):
         if len(input_dirs) <= 0:
-            raise Exception("Sisesta sisendkaust")
+            self.status.setText("Sisendkausta pole sisestatud!")
+            return
 
+        self.status.setText("Töötlen pilte...")
+        
         data, args, total_picture_count = resizer.setup(input_dirs, args)
         total_resizes_done = 0
 
@@ -108,8 +128,10 @@ class AppDemo(QMainWindow):
             output_dir = task[1]
             img_file_names = task[2]
             len_img_file_names = len(img_file_names)
-
-            self.taskProgressLabel.setText("Kaust: " + str(i + 1) + "/" + str(len(data)))
+            
+            pretty_input_dir = input_dir.split("/")[-2]
+            self.taskProgressLabel.setText("Töödeldud kaustade arv: " + str(i + 1) + "/" + str(len(data)) + " ("+ pretty_input_dir +")")
+            
             for j, ifn in enumerate(img_file_names):
                 img_abspath = input_dir + ifn
                 save_loc = output_dir + ifn
@@ -117,11 +139,13 @@ class AppDemo(QMainWindow):
                 result = resizer.resize_img(img_abspath, save_loc, args)
                 total_resizes_done += 1
                 self.taskResizeProgressLabel.setText(
-                    "Pildid kaustas: " + str(j + 1) + "/" + str(len_img_file_names))
+                    "Kaustas töödeldud piltide arv: " + str(j + 1) + "/" + str(len_img_file_names))
                 
                 
-                self.totalResizeProgressLabel.setText("Pilte kokku: " + str(total_resizes_done) + "/" + str(total_picture_count))
+                self.totalResizeProgressLabel.setText("Töödeldud piltide arv kokku: " + str(total_resizes_done) + "/" + str(total_picture_count))
                 app.processEvents()
+                
+        self.status.setText("Piltide töötlus lõpetatud")
 
     def getInputDirs(self):
         lbw = self.lstBoxView
