@@ -109,8 +109,10 @@ def add_padding(img, args):
 
 def remove_black_borders(img):
     pix = np.array(img)
-    black = np.array([0, 0, 0])
-    white = np.array([255, 255, 255])
+    
+    black, white = get_black_and_white_value(pix.shape[-1] == 4)
+        
+    print(pix.shape, black.shape, white.shape)
 
     pix2 = pix.copy()
     dim = pix.shape
@@ -124,3 +126,8 @@ def remove_black_borders(img):
             pix2[:, n] = white
 
     return Image.fromarray(pix2)
+
+def get_black_and_white_value(img_is_rgba):
+    if img_is_rgba:
+        return np.array([0, 0, 0, 0]), np.array([255, 255, 255, 0])
+    return np.array([0, 0, 0]), np.array([255, 255, 255])
