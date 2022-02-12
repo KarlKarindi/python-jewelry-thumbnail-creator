@@ -98,10 +98,16 @@ def add_padding(img, args):
     height = img.size[1]
     if width != height:
         bigger_side = width if width > height else height
-        bg = Image.new('RGB', (bigger_side + args.padding,
-                               bigger_side + args.padding), (255, 255, 255))
-        offset = ((bigger_side - width + args.padding) // 2,
-                  (bigger_side - height + args.padding) // 2)
+        sum_of_bigger_side_and_padding = bigger_side + args.padding
+        
+        # Check this so we don't create an image with size < 0
+        if sum_of_bigger_side_and_padding < 0:
+            sum_of_bigger_side_and_padding = 0
+            
+        bg = Image.new('RGB', (sum_of_bigger_side_and_padding,
+                               sum_of_bigger_side_and_padding), (255, 255, 255))
+        offset = ((sum_of_bigger_side_and_padding - width) // 2,
+                  (sum_of_bigger_side_and_padding - height) // 2)
         bg.paste(img, offset)
         return bg
     return img
@@ -111,8 +117,6 @@ def remove_black_borders(img):
     pix = np.array(img)
     
     black, white = get_black_and_white_value(pix.shape[-1] == 4)
-        
-    print(pix.shape, black.shape, white.shape)
 
     pix2 = pix.copy()
     dim = pix.shape
