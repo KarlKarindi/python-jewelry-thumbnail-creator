@@ -53,25 +53,33 @@ class AppDemo(QMainWindow):
 
         self.lstBoxView = ListboxWidget(self)
 
-        self.paddingLabel = QLabel('0', self)
-        # This sets the initial slider label value
-        self.paddingLabel.setText("Lisataust: " + str(10))
-        self.paddingLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        self.paddingLabel.setMinimumWidth(60)
-        self.paddingLabel.setGeometry(590, 50, 200, 50)
+        self.zoomInfo = QLabel('Kui valida liiga kõrge "zoom" väärtus, võib väljund olla must pilt.\nSelle vältimiseks vali väiksem "zoom" väärtus', self)
+        self.zoomInfo.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.zoomInfo.setMinimumWidth(400)
+        self.zoomInfo.setMaximumWidth(400)
+        self.zoomInfo.resize(400, 30)
+        self.zoomInfo.setGeometry(620, 0, 200, 50)
 
-        self.paddingSlider = QtWidgets.QSlider(Qt.Horizontal, self)
+        self.zoomLabel = QLabel('0', self)
+        # This sets the initial slider label value
+        self.zoomLabel.setText("Zoom: " + str(0))
+        self.zoomLabel.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.zoomLabel.setMinimumWidth(60)
+        self.zoomLabel.setGeometry(590, 50, 200, 50)
+
+        self.zoomSlider = QtWidgets.QSlider(Qt.Horizontal, self)
         # This sets the initial slider value
-        self.paddingSlider.setSliderPosition(100)
-        self.paddingSlider.setGeometry(750, 50, 200, 50)
-        self.paddingSlider.setRange(-100, 100)
-        self.paddingSlider.setPageStep(10)
-        self.paddingSlider.valueChanged.connect(self.change_padding)
-        self.paddingSlider.setFocusPolicy(Qt.NoFocus)
+        self.zoomSlider.setSliderPosition(0)
+        self.zoomSlider.setGeometry(750, 50, 200, 50)
+        self.zoomSlider.setRange(-100, 100)
+        self.zoomSlider.setPageStep(10)
+        self.zoomSlider.valueChanged.connect(self.change_padding)
+        self.zoomSlider.setFocusPolicy(Qt.NoFocus)
+        
 
         self.reflectionCheckBox = QtWidgets.QCheckBox(
             "Eemalda peegeldus", self)
-        self.reflectionCheckBox.setGeometry(QtCore.QRect(650, 130, 200, 50))
+        self.reflectionCheckBox.setGeometry(QtCore.QRect(665, 115, 200, 50))
         self.reflectionCheckBox.setObjectName("checkBoxPeegeldus")
         self.reflectionCheckBox.clicked.connect(self.toggle_reflection_removal)
         self.reflectionCheckBox.setChecked(True)
@@ -178,8 +186,8 @@ class AppDemo(QMainWindow):
         ARGS.do_reflection_removal = not ARGS.do_reflection_removal
 
     def change_padding(self, value):
-        self.paddingLabel.setText("Lisataust: " + str(value // 10))
-        ARGS.padding = value * 10
+        self.zoomLabel.setText("Zoom: " + str(value // 10))
+        ARGS.padding = value * 10 * -1
 
     def closeEvent(self, event=None):
         self.APP_IS_OPEN = False
