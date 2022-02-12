@@ -8,3 +8,6 @@ pics_to_resize/
 .ionide
 __pycache__
 menu.exe
+build
+dist
+menu.spec
