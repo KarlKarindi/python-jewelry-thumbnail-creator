@@ -53,7 +53,7 @@ class AppDemo(QMainWindow):
 
         self.lstBoxView = ListboxWidget(self)
 
-        self.zoomInfo = QLabel('Kui valida liiga kõrge "zoom" väärtus, võib väljund olla must pilt.\nSelle vältimiseks vali väiksem "zoom" väärtus', self)
+        self.zoomInfo = QLabel('Kui valida liiga kõrge "zoom" väärtus, võib väljund olla must pilt.\nSelle vältimiseks vali väiksem "zoom" väärtus.', self)
         self.zoomInfo.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.zoomInfo.setMinimumWidth(400)
         self.zoomInfo.setMaximumWidth(400)
