@@ -72,7 +72,7 @@ class AppDemo(QMainWindow):
         self.zoomSlider.setSliderPosition(0)
         self.zoomSlider.setGeometry(750, 50, 200, 50)
         self.zoomSlider.setRange(-100, 100)
-        self.zoomSlider.setPageStep(10)
+        self.zoomSlider.setPageStep(1)
         self.zoomSlider.valueChanged.connect(self.change_padding)
         self.zoomSlider.setFocusPolicy(Qt.NoFocus)
         
@@ -186,7 +186,7 @@ class AppDemo(QMainWindow):
         ARGS.do_reflection_removal = not ARGS.do_reflection_removal
 
     def change_padding(self, value):
-        self.zoomLabel.setText("Zoom: " + str(value // 10))
+        self.zoomLabel.setText("Zoom: " + str(value / 10))
         ARGS.padding = value * 10 * -1
 
     def closeEvent(self, event=None):
